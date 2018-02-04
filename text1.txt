@@ -1,6 +1,6 @@
 hi this is the first line.
 
 This is second line
-This is fourth line and fourthcommit.
+This is fourth line and fourth commit.
 
 This sixth commit.
