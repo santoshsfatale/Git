@@ -1,0 +1,9 @@
+function [P]=createSetC(setP,Freshness,Popularity)
+P=zeros(length(Popularity),3); % Column1: modified Popularity; Column2: Freshness; Column3: 
+modifiedPopularity(1:length(setP),1)=setP;
+modifiedPopularity(length(setP)+1:length(Popularity),1)=(1-sum(modifiedPopularity(1:length(setP))))/(length(Popularity)-length(setP));
+P(:,1)=modifiedPopularity(:,1);
+P(:,2)=Freshness;
+P(:,3)=P(:,1).*P(:,2);
+[~, indices]=sort(P(:,3),'descend');
+P=P(indices,:);
