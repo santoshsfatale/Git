@@ -39,7 +39,7 @@ CacheSize_X=0:5:CacheSize_C;
 % CacheSize_X=[0:20 25:5:CacheSize_C-20 CacheSize_C-19:CacheSize_C];
 % CacheSize_X=[0:20 25:5:Producers-20 Producers-19:Producers];
 % CacheSize_X=0:20;
-DataSize_D=1:5:50;
+DataSize_D=1:10:20;
 % Factor=1.0
 % RouterStorageCapacity=floor(Factor*CacheSize);
 
