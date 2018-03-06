@@ -1059,21 +1059,21 @@ clear produ t_inst N_min N_max N_min_temp N_max_temp
 % myplotNew will take care of 3\sigma error-bar in plot.
 clear temp1;
 temp1=cd;
-xinput(:,1)=CacheSize_X(dd,:);
+xinput(:,1)=CacheSize_X(1,:);
 yinputMatrix_avg=hit_rate_total_Sim_Zipf_LeastExpe;
 % yinputMatrix_stdDev=horzcat(hit_rate_total_Sim_Zipf_LeastExpe_stdDev',hit_rate_total_Sim_Zipf_LRU_stdDev',hit_rate_total_Sim_Zipf_RAND_stdDev',hit_rate_total_Sim_Zipf_SMP_stdDev');
-xlabel1=sprintf('Cache size (X)');
+xlabel1=sprintf('Normalized Cache size (X/D)');
 ylabel1=sprintf('Cache hit ratio (LU)');
 % title1=sprintf('Hit rate (p_{hit}) Vs Cache size');
 % directory='D:\IoT\IoT\31Jan\LeastExpected\CheckCodes\Results_HitRateLU_Vs_X\UniformFreshness';
 directory='D:\IoT\IoT\31Jan\LeastExpected\CheckCodes\Results_HitRateLU_Vs_X\UniformFreshness\new0_VariableCache100timesDSize';
-legend={};
+legend=cell(1,length(DataSize_D));
 for ii=1:length(DataSize_D)
     legend1{ii}=sprintf('d=%d',DataSize_D(ii));
 end
-saveFigAs=sprintf('Hit_rateLU_Vs_Cache_Size_X_Zipf_%d_C%d_F%d',beta*10,CacheSize_C,Freshness);
-xlim1=[10 40];
-ylim1=[0 1];
+saveFigAs=sprintf('Hit_rateLU_Vs_Cache_Size_X_Zipf_%d_Cis100D_F%d',beta*10,Freshness);
+% xlim1=[10 40];
+% ylim1=[0 1];
 title1={sprintf('beta=%0.2f;Total N=%d;C=%d;F=%d',beta,Producers,CacheSize_C,Freshness)};
 myplotHitRateVsX(xinput,yinputMatrix_avg,xlabel1,ylabel1,legend1,xlim1,ylim1,title1,saveFigAs,directory);
 cd(temp1);

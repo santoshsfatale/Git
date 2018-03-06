@@ -42,8 +42,8 @@ ylabel(ylabel1,'Fontsize',12);%,'FontName','MS Serif');
 % set(h2,'FontName','MS Serif');
 % title(title1,'Fontsize',14);
 legend(legend1);
-xlim(xlim1);
-ylim(ylim1);
+% xlim(xlim1);
+% ylim(ylim1);
 title(title11);
 hold off;
 cd(directory)
