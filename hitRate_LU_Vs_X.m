@@ -20,7 +20,7 @@ close all;
 %%
 NumberOfRequests=10^5;
 NumberOfIterations=10^0;
-Producers=10*10^2; % Number of Producers (N)
+Producers=50*10^2; % Number of Producers (N)
 global Pop_producers
 
 global Freshness_requirment
@@ -34,12 +34,17 @@ RemovedProducerClassIndexIndicator=zeros(NumberOfRequests,2);
 RemovedProducerRecord=zeros(NumberOfRequests,2);
 
 ProbForSavingVectorR1=1;%0.2:0.2:1.0;%1.0;
-CacheSize_C=100;
-CacheSize_X=0:5:CacheSize_C;
+DataSize_D=[1 10 20];
+CacheSize_C=100*DataSize_D;
+CacheSize_X=zeros(length(DataSize_D),length(0:5*max(DataSize_D):max(CacheSize_C)));
+for ii=1:length(DataSize_D)
+    clear temp1
+    temp1=0:5*DataSize_D(ii):CacheSize_C(ii);
+    CacheSize_X(ii,1:length(temp1))=temp1;
+end
 % CacheSize_X=[0:20 25:5:CacheSize_C-20 CacheSize_C-19:CacheSize_C];
 % CacheSize_X=[0:20 25:5:Producers-20 Producers-19:Producers];
 % CacheSize_X=0:20;
-DataSize_D=1:10:20;
 % Factor=1.0
 % RouterStorageCapacity=floor(Factor*CacheSize);
 
@@ -51,7 +56,7 @@ global Router1_hit_count %RemovedProducerIndexIndicator RemovedProducer memoryR1
 
 
 % Prob_a=0.4;%0.25:0.05:0.45;
-beta=1.7;%0.5:0.3:1.7;
+beta=0.5;%0.5:0.3:1.7;
 display(sprintf('beta=%0.2f',beta));
 % hit_rate_total_Sim_Uni_LeastExpe=zeros(NumberOfIterations,length(CacheSize));
 % hit_rate_total_Sim_Uni_LeastExpeModified=zeros(NumberOfIterations,length(CacheSize));
@@ -607,23 +612,23 @@ end
 
 
 %% Least Expected Variables :::::::::::::::::::::::::::::::::::::::::::::::
-R1_hit_count_Zipf_LeastExpe=zeros(Producers,length(CacheSize_X),length(DataSize_D));
+R1_hit_count_Zipf_LeastExpe=zeros(Producers,length(CacheSize_X(1,:)),length(DataSize_D));
 
-N_min_Zipf_LeastExpe=zeros(length(CacheSize_X),length(DataSize_D));
-N_max_Zipf_LeastExpe=zeros(length(CacheSize_X),length(DataSize_D));
+N_min_Zipf_LeastExpe=zeros(length(CacheSize_X(1,:)),length(DataSize_D));
+N_max_Zipf_LeastExpe=zeros(length(CacheSize_X(1,:)),length(DataSize_D));
 
 
 
 for dd=1:length(DataSize_D)
     display(sprintf('DataSize=%d',DataSize_D(dd)));
-    N_min=zeros(length(CacheSize_X),1);
-    N_max=zeros(length(CacheSize_X),1);
+    N_min=zeros(length(CacheSize_X(1,:)),1);
+    N_max=zeros(length(CacheSize_X(1,:)),1);
 
     %% Zipf distribution with parameter beta Least Expected
-    for xx=1:length(CacheSize_X)
-        RemainingProbability=(1-sum(ProducersProbability_Zipf(1:CacheSize_X(xx),1)))/(Producers-CacheSize_X(xx));
-        Probability_producers(:,1)=[ProducersProbability_Zipf(1:CacheSize_X(xx),1); RemainingProbability*ones(Producers-CacheSize_X(xx),1)];
-        display(sprintf('CacheSize_X=%d',CacheSize_X(xx)));
+    for xx=1:length(CacheSize_X(dd,:))
+        RemainingProbability=(1-sum(ProducersProbability_Zipf(1:CacheSize_X(dd,xx),1)))/(Producers-CacheSize_X(dd,xx));
+        Probability_producers(:,1)=[ProducersProbability_Zipf(1:CacheSize_X(dd,xx),1); RemainingProbability*ones(Producers-CacheSize_X(dd,xx),1)];
+        display(sprintf('CacheSize_X=%d',CacheSize_X(dd,xx)));
 
 %         for cache=1:length(CacheSize)
 %             N_a=CacheSize(cache);
@@ -640,7 +645,7 @@ for dd=1:length(DataSize_D)
         % Second Column: Producer number
         % Third Column: time_stamp at ehich data for corresponding producer was
         % being fetched and stored.
-                memoryR1_LeastExpe=zeros(floor((CacheSize_C-CacheSize_X(xx))/DataSize_D(dd)),2);
+                memoryR1_LeastExpe=zeros(floor((CacheSize_C(dd)-CacheSize_X(dd,xx))/DataSize_D(dd)),2);
 
                 Router1_hit_count=zeros(Producers,1);
 
@@ -648,7 +653,7 @@ for dd=1:length(DataSize_D)
                 count2=0;
 
                 message=sprintf('Running for Cache Size=%d and ProbForSavingR1=%f and beta=%f'...
-                                ,CacheSize_C,ProbForSavingR1,beta);
+                                ,CacheSize_C(dd),ProbForSavingR1,beta);
                 h=msgbox(message);
                 clear message
 
@@ -1054,14 +1059,14 @@ clear produ t_inst N_min N_max N_min_temp N_max_temp
 % myplotNew will take care of 3\sigma error-bar in plot.
 clear temp1;
 temp1=cd;
-xinput(:,1)=CacheSize_X;
+xinput(:,1)=CacheSize_X(dd,:);
 yinputMatrix_avg=hit_rate_total_Sim_Zipf_LeastExpe;
 % yinputMatrix_stdDev=horzcat(hit_rate_total_Sim_Zipf_LeastExpe_stdDev',hit_rate_total_Sim_Zipf_LRU_stdDev',hit_rate_total_Sim_Zipf_RAND_stdDev',hit_rate_total_Sim_Zipf_SMP_stdDev');
 xlabel1=sprintf('Cache size (X)');
 ylabel1=sprintf('Cache hit ratio (LU)');
 % title1=sprintf('Hit rate (p_{hit}) Vs Cache size');
 % directory='D:\IoT\IoT\31Jan\LeastExpected\CheckCodes\Results_HitRateLU_Vs_X\UniformFreshness';
-directory='D:\IoT\IoT\31Jan\LeastExpected\CheckCodes\Results_HitRateLU_Vs_X\UniformFreshness\new0_100';
+directory='D:\IoT\IoT\31Jan\LeastExpected\CheckCodes\Results_HitRateLU_Vs_X\UniformFreshness\new0_VariableCache100timesDSize';
 legend={};
 for ii=1:length(DataSize_D)
     legend1{ii}=sprintf('d=%d',DataSize_D(ii));
@@ -1084,7 +1089,7 @@ cd(temp1);
 %% always change the dataname for saving. Keep it simple and discriptive.
 % temp1=cd;
 % cd('D:\IoT\IoT\31Jan\LeastExpected\CheckCodes\Results_HitRateLU_Vs_X\UniformFreshness')
-cd('D:\IoT\IoT\31Jan\LeastExpected\CheckCodes\Results_HitRateLU_Vs_X\UniformFreshness\new0_100')
+cd('D:\IoT\IoT\31Jan\LeastExpected\CheckCodes\Results_HitRateLU_Vs_X\UniformFreshness\new0_VariableCache100timesDSize')
 save(sprintf('cmp_cache_LU_Vs_X_Zipf_%d_C%d_F%d',beta*10,CacheSize_C,Freshness));
 toc
 
