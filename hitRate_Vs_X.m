@@ -1,28 +1,80 @@
-clear all
-clc
- CacheSize_C=400;
- DataSize_D=1:5;
+% clear all
+% clc
+%  CacheSize_C=100;
+%  DataSize_D=1:5;
+%  beta=0.5;
+%  NumberOfProducers_N=400;
+%  nn=1:NumberOfProducers_N;
+%  const=20;
+%  F_a=5;
+%  F_b=const*F_a;
+%  F_c=F_a;
+%  N_a=100;%CacheSize_C;
+%  N_b=100;%CacheSize_C;
+%  N_c=NumberOfProducers_N-N_a-N_b;
+%  parameter=10;
+%  Freshness=nn'+parameter;%[repmat(F_a,N_a,1);repmat(F_b,N_b,1);repmat(F_c,N_c,1)];
+%  ProducersProbability(:,1)=(nn.^(-beta))/sum(nn.^(-beta));
+%  CacheForPopularity_X=CacheSize_C:-1:1;
+%  data=0;
+% %  Freshness_cap=zeros(NumberOfProducers_N,length(DataSize_D));
+%  LowerBound_LeastExpected=zeros(CacheSize_C,length(DataSize_D));
+%  
+%  for dd=1:length(DataSize_D)
+%      data=0;
+%      for pp=CacheSize_C:-1:1
+%          temp=zeros(NumberOfProducers_N,3);
+%          temp(1:pp,1)=ProducersProbability(1:pp,1);
+%          RemainingProbability=(1-sum(ProducersProbability(1:pp,1)))/(NumberOfProducers_N-pp);
+%          temp(pp+1:NumberOfProducers_N,1)=ones(NumberOfProducers_N-pp,1)*RemainingProbability;
+%          temp(:,2)=Freshness;
+%          temp(:,3)=temp(:,1).*temp(:,2);
+%          
+%          [~,indices]=sort(temp(:,3),'descend');
+%          temp=temp(indices,:);
+%          
+% %          display(sprintf('Probability=%f',sum(temp(:,1))));
+%          
+%          if mod(CacheSize_C-pp,DataSize_D(dd))==0
+%              data=data+1;
+%              display('Here2')
+%          end
+% 
+%          if data==0
+%              LowerBound_LeastExpected(CacheSize_C-pp+1,dd)=0;
+%              display('Here1')
+%              continue;
+%          end
+%          clear temp1 temp2
+%          
+%          Freshness_cap(:,1)=temp(:,2)-(temp(data,3)./temp(:,1));
+%          temp1(:,1)=temp(:,1).*Freshness_cap;
+%          LowerBound_LeastExpected(CacheSize_C-pp+1,dd)=sum((temp(1:data-1,1).*temp1(1:data-1,1))./(1+temp1(1:data-1,1)));
+%      
+%      end
+%  end
+
+ %%
+ close all
+ clear all
+ clc
+ 
+ DataSize_D=[1 10 20];
+ CacheSize_C=100*DataSize_D;
  beta=0.5;
- NumberOfProducers_N=400;
+ NumberOfProducers_N=5000;
  nn=1:NumberOfProducers_N;
- const=20;
- F_a=5;
- F_b=const*F_a;
- F_c=F_a;
- N_a=100;%CacheSize_C;
- N_b=100;%CacheSize_C;
- N_c=NumberOfProducers_N-N_a-N_b;
- parameter=10;
- Freshness=nn'+parameter;%[repmat(F_a,N_a,1);repmat(F_b,N_b,1);repmat(F_c,N_c,1)];
  ProducersProbability(:,1)=(nn.^(-beta))/sum(nn.^(-beta));
- CacheForPopularity_X=CacheSize_C:-1:1;
- data=0;
-%  Freshness_cap=zeros(NumberOfProducers_N,length(DataSize_D));
- LowerBound_LeastExpected=zeros(CacheSize_C,length(DataSize_D));
+ Freshness=1000;
+ CacheSize_X=zeros(length(DataSize_D),length(0:max(DataSize_D):max(CacheSize_C)));
+ for ii=1:length(DataSize_D)
+     CacheSize_X(ii,:)=0:DataSize_D(ii):CacheSize_C(ii);
+ end
+ LowerBound_LeastExpected=zeros(length(CacheSize_X(1,:)),length(DataSize_D));
  
  for dd=1:length(DataSize_D)
      data=0;
-     for pp=CacheSize_C:-1:1
+     for pp=0:length(CacheSize_X(dd,:))-1
          temp=zeros(NumberOfProducers_N,3);
          temp(1:pp,1)=ProducersProbability(1:pp,1);
          RemainingProbability=(1-sum(ProducersProbability(1:pp,1)))/(NumberOfProducers_N-pp);
@@ -34,28 +86,34 @@ clc
          temp=temp(indices,:);
          
 %          display(sprintf('Probability=%f',sum(temp(:,1))));
-         
-         if mod(CacheSize_C-pp,DataSize_D(dd))==0
-             data=data+1;
-             display('Here2')
-         end
-
+         data=floor((CacheSize_C(dd)-CacheSize_X(dd,pp+1))/DataSize_D(dd))
          if data==0
-             LowerBound_LeastExpected(CacheSize_C-pp+1,dd)=0;
+             LowerBound_LeastExpected(pp+1,dd)=0;
              display('Here1')
              continue;
          end
-         clear temp1 temp2
-         
          Freshness_cap(:,1)=temp(:,2)-(temp(data,3)./temp(:,1));
-         temp1(:,1)=temp(:,1).*Freshness_cap;
-         LowerBound_LeastExpected(CacheSize_C-pp+1,dd)=sum((temp(1:data-1,1).*temp1(1:data-1,1))./(1+temp1(1:data-1,1)));
+         LowerBound_LeastExpected(pp+1,dd)=sum((temp(1:data-1,1).*temp(1:data-1,1))./(1+temp(1:data-1,1)));
+
+
+%          if mod(CacheSize_C-CacheSize_X(pp),DataSize_D(dd))==0
+%              data=data+1;
+%              display('Here2')
+%          end
+% 
+%          
+%          clear temp1 temp2
+%          
+%          Freshness_cap(:,1)=temp(:,2)-(temp(data,3)./temp(:,1));
+%          temp1(:,1)=temp(:,1).*Freshness_cap;
+%          LowerBound_LeastExpected(CacheSize_C-pp+1,dd)=sum((temp(1:data-1,1).*temp1(1:data-1,1))./(1+temp1(1:data-1,1)));
      
      end
  end
 
+ 
  %%
- temp1=cd;
+temp1=cd;
 xinput(:,1)=CacheForPopularity_X;
 yinputMatrix=LowerBound_LeastExpected;
 % yinputMatrix_stdDev=horzcat(hit_rate_total_Sim_Uni_LeastExpe_stdDev',hit_rate_total_Sim_Uni_LRU_stdDev',hit_rate_total_Sim_Uni_RAND_stdDev',hit_rate_total_Sim_Uni_SMP_stdDev');
