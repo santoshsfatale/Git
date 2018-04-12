@@ -16,15 +16,16 @@ NumberOfProducers_N=5000;
 nn=1:NumberOfProducers_N;
 ProducersProbability_Zipf(:,1)=(nn.^(-beta))/sum(nn.^(-beta));
 
-LowerBound_LeastExpected=zeros(1,length(DataSize_D));
-hit_rate_total_Max_Sim_Zipf_LeastExpe=zeros(length(DataSize_D),length(0:5:max(CacheSize_C)));
-optimalX_sim=zeros(1,length(DataSize_D));
+optimalX_sim_LowerBound=zeros(1,length(DataSize_D));
+optimalX_sim_LU=zeros(1,length(DataSize_D));
+LowerBound_LeastExpected=zeros(length(1:5:max(CacheSize_C)),length(DataSize_D));
+hit_rate_total_Max_Sim_Zipf_LeastExpe=zeros(length(0:5:max(CacheSize_C)),length(DataSize_D));
 
 %% Optimal X (xStar) calculation Theorotical
 optimalX_theo=floor(CacheSize_C./(DataSize_D+1)); % size is same as DataSize_D
 
 %% Uniform Freshness
-Freshness=1000;
+Freshness=500;
 Freshness_Zipf(:,1)=Freshness*ones(NumberOfProducers_N,1);%UniformFreshness
  
 %% Exponential inter-arrival time
@@ -55,10 +56,10 @@ tic
 %         display(sprintf('Optimal X for DataSize=%d is %d',DataSize_D(dd),X(xx)));
     
     %% Calculate Lower Bound at optimalX
-    %     temp=zeros(NumberOfProducers_N,3);
-    %     temp(:,1)=Probability_producers;
-    %     temp(:,2)=Freshness_Zipf;
-    %     temp(:,3)=temp(:,1).*temp(:,2);
+        temp=zeros(NumberOfProducers_N,3);
+        temp(:,1)=Probability_producers;
+        temp(:,2)=Freshness_Zipf;
+        temp(:,3)=temp(:,1).*temp(:,2);
     
         Freshness_requirment=Freshness_Zipf(:,1);
 
@@ -67,9 +68,14 @@ tic
         memoryR1_LeastExpe=zeros(floor((CacheSize_C(dd)-X(xx))/DataSize_D(dd)),2);%zeros(floor((CacheSize_C(dd)-optimalX(dd))/DataSize_D(dd)),2);
         [memoryR1Length, memoryR1Width]=size(memoryR1_LeastExpe);    
         display(sprintf('Size of memoryR1_LeastExpe is %d x %d',memoryR1Length,memoryR1Width));
+        
+        if memoryR1Length==0
+            LowerBound_LeastExpected(xx,dd)=0;
+            continue;
+        end
     
-    %     Freshness_cap(:,1)=temp(:,2)-(temp(memoryR1Length,3)./temp(:,1));
-    %     LowerBound_LeastExpected(1,dd)=sum(((temp(1:memoryR1Length,1).^2).*Freshness_cap(1:memoryR1Length))./(1+(temp(1:memoryR1Length,1).*Freshness_cap(1:memoryR1Length))));
+        Freshness_cap(:,1)=temp(:,2)-(temp(memoryR1Length,3)./temp(:,1));
+        LowerBound_LeastExpected(xx,dd)=sum(((temp(1:memoryR1Length,1).^2).*Freshness_cap(1:memoryR1Length))./(1+(temp(1:memoryR1Length,1).*Freshness_cap(1:memoryR1Length))));
 
     %     display(Freshness_cap(1:memoryR1Length));
 
@@ -101,19 +107,24 @@ tic
     %                     end
 
         end
-        N_min=N_min_temp; % jj-> row number; kk-> column number
-        N_max=N_max_temp;
+%         N_min=N_min_temp; % jj-> row number; kk-> column number
+%         N_max=N_max_temp;
 
         delete(h);
         clear('h');
 
         R1_hit_count_Zipf_LeastExpe(:,xx)=Router1_hit_count;
-        clear temp;
+        
     end
+    clear temp;
     temp(1,:)=sum(R1_hit_count_Zipf_LeastExpe)/NumberOfRequests;
-    [value, index]=max(temp);
+    [~, index]=max(temp);
     hit_rate_total_Max_Sim_Zipf_LeastExpe(dd,1:length(X))=temp;
-    optimalX_sim(1,dd)=X(index);
+    optimalX_sim_LU(1,dd)=X(index);
+    clear temp;
+    temp(1,:)=LowerBound_LeastExpected(:,dd);
+    [~, index]=max(temp);
+    optimalX_sim_LowerBound(1,dd)=X(index);
 
 %         N_min_Zipf_LeastExpe(1,dd)=N_min;
 %         N_max_Zipf_LeastExpe(1,dd)=N_max;
