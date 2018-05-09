@@ -28,7 +28,7 @@ clear all;
 % close all;
 % clc;
 %%
-NumberOfRequests=10^4;
+NumberOfRequests=10^7;
 NumberOfIterations=10^0;
 Producers=5000; % Number of Producers
 global Pop_producers
@@ -38,8 +38,8 @@ const=10^2*0.8;
 Freshness=1000;
 % Freshness_requirment=[F_a F_b F_c];
 
-RemovedProducerClassIndexIndicator=zeros(NumberOfRequests,2);
-RemovedProducerRecord=zeros(NumberOfRequests,2);
+% RemovedProducerClassIndexIndicator=zeros(NumberOfRequests,2);
+% RemovedProducerRecord=zeros(NumberOfRequests,2);
 
 ProbForSavingVectorR1=1;%0.2:0.2:1.0;%1.0;
 CacheSize=100:100:500;
@@ -184,7 +184,7 @@ for ii=1:length(CacheSize)
     upperBound1(ii)=sum(((ProducersProbability_Zipf(1:CacheSize(ii)).^2).*Freshness)./(1+(ProducersProbability_Zipf(1:CacheSize(ii)).*Freshness)));
     upperBound2(ii)=sum(ProducersProbability_Zipf(1:CacheSize(ii)));
 end
-% upperBound2=ProducersProbability_Zipf(1:CacheSize);
+upperBound=min(upperBound1,upperBound2);
 clear N_min_Zipf_LeastExpe N_min_Zipf_LRU N_min_Zipf_RAND N_min_Zipf_SMP N_max_Zipf_LeastExpe N_max_Zipf_LRU N_max_Zipf_RAND N_max_Zipf_SMP
 clear produ t_inst N_min N_max N_min_temp N_max_temp
 
@@ -193,11 +193,11 @@ clear produ t_inst N_min N_max N_min_temp N_max_temp
 % myplotNew will take care of 3\sigma error-bar in plot.
 clear temp1;
 temp1=cd;
-xinput(:,1)=1:CacheSize;
-yinputMatrix_avg=horzcat(R1_hit_count_Zipf_LeastExpe(1:CacheSize,1)./requests_Zipf(1:CacheSize,1),lowerBound',upperBound1');
-xlabel1=sprintf('Producer Index');
-ylabel1=sprintf('Probability of Hit');
-title1=sprintf(sprintf('Comparision of hits beta =%1.2f(simulation and Lower Bound)',beta));
+xinput(:,1)=CacheSize;
+yinputMatrix_avg=horzcat(hit_rate_total_Sim_Zipf_LeastExpe',lowerBound',upperBound');
+xlabel1=sprintf('Cache Size');
+ylabel1=sprintf('Cache Hit Ratio');
+title1=sprintf(sprintf('Comparision of hits \beta =%1.2f, F=%d,N=%d',beta,Freshness,Producers));
 directory='D:\IoT\IoT\31Jan\LeastExpected\CheckCodes\Results_F_b_400';
 legend1={sprintf('Simulation'),sprintf('Lower Bound'),sprintf('Upper Bound')};
 saveFigAs=sprintf('Hit_rate_Vs_Cache_Size_policies_Zipf');
